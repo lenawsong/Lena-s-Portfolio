@@ -17,7 +17,8 @@ const Work = () => {
   const [selectedProject, setSelectedProject] = useState(null);
   
   useEffect(() => {
-    const query = '*[_type == "works"]';
+    // Updated query to include the new boolean fields
+    const query = '*[_type == "works"]{ title, description, projectLink, showProjectLink, codeLink, showCodeLink, imgUrl, tags, openInModal }';
 
     client.fetch(query)
       .then((data) => {
@@ -81,40 +82,46 @@ const Work = () => {
                 transition={{ duration: 0.25, ease: 'easeInOut', staggerChildren: 0.5 }}
                 className="app__work-hover app__flex"
               >
-                {/* Conditional: modal or new tab based on Sanity field */}
-                {work.openInModal ? (
-                  <motion.div
-                    whileInView={{ scale: [0, 1] }}
-                    whileHover={{ scale: [1, 0.9] }}
-                    transition={{ duration: 0.25 }}
-                    className="app__flex"
-                    onClick={() => openModal(work)}
-                    style={{ cursor: 'pointer' }}
-                  >
-                    <AiFillEye />
-                  </motion.div>
-                ) : (
-                  <a href={work.projectLink} target="_blank" rel="noreferrer">
+                {/* Conditional Project Link (Eye Icon) - only show if enabled in Sanity */}
+                {work.showProjectLink && work.projectLink && (
+                  work.openInModal ? (
+                    <motion.div
+                      whileInView={{ scale: [0, 1] }}
+                      whileHover={{ scale: [1, 0.9] }}
+                      transition={{ duration: 0.25 }}
+                      className="app__flex"
+                      onClick={() => openModal(work)}
+                      style={{ cursor: 'pointer' }}
+                    >
+                      <AiFillEye />
+                    </motion.div>
+                  ) : (
+                    <a href={work.projectLink} target="_blank" rel="noreferrer">
+                      <motion.div
+                        whileInView={{ scale: [0, 1] }}
+                        whileHover={{ scale: [1, 0.9] }}
+                        transition={{ duration: 0.25 }}
+                        className="app__flex"
+                      >
+                        <AiFillEye />
+                      </motion.div>
+                    </a>
+                  )
+                )}
+
+                {/* Conditional GitHub Link - only show if enabled in Sanity */}
+                {work.showCodeLink && work.codeLink && (
+                  <a href={work.codeLink} target="_blank" rel="noreferrer">
                     <motion.div
                       whileInView={{ scale: [0, 1] }}
                       whileHover={{ scale: [1, 0.9] }}
                       transition={{ duration: 0.25 }}
                       className="app__flex"
                     >
-                      <AiFillEye />
+                      <AiFillGithub />
                     </motion.div>
                   </a>
                 )}
-                <a href={work.codeLink} target="_blank" rel="noreferrer">
-                  <motion.div
-                    whileInView={{ scale: [0, 1] }}
-                    whileHover={{ scale: [1, 0.9] }}
-                    transition={{ duration: 0.25 }}
-                    className="app__flex"
-                  >
-                    <AiFillGithub />
-                  </motion.div>
-                </a>
               </motion.div>
             </div>
 
