@@ -7,14 +7,18 @@ import { urlFor, client } from '../../client';
 import './Work.scss';
 
 const Work = () => {
-
   const [activeFilter, setActiveFilter] = useState('All');
   const [animateCard, setAnimateCard] = useState({ y: 0, opacity: 1 });
   const [works, setWorks] = useState([]);
   const [filterWork, setFilterWork] = useState([]);
   
+  // Modal state
+  const [showModal, setShowModal] = useState(false);
+  const [selectedProject, setSelectedProject] = useState(null);
+  
   useEffect(() => {
     const query = '*[_type == "works"]';
+
     client.fetch(query)
       .then((data) => {
         setWorks(data);
@@ -35,6 +39,18 @@ const Work = () => {
         setFilterWork(works.filter((work) => work.tags.includes(item)));
     }}, 500);
   }
+
+  // Modal handlers
+  const openModal = (work) => {
+    setSelectedProject(work);
+    setShowModal(true);
+  };
+
+  const closeModal = () => {
+    setShowModal(false);
+    setSelectedProject(null);
+  };
+
   return (
     <>
       <h2 className="head-text">My Creative <span>Portfolio</span> Section</h2>
@@ -65,16 +81,30 @@ const Work = () => {
                 transition={{ duration: 0.25, ease: 'easeInOut', staggerChildren: 0.5 }}
                 className="app__work-hover app__flex"
               >
-                <a href={work.projectLink} target="_blank" rel="noreferrer">
+                {/* Conditional: modal or new tab based on Sanity field */}
+                {work.openInModal ? (
                   <motion.div
                     whileInView={{ scale: [0, 1] }}
                     whileHover={{ scale: [1, 0.9] }}
                     transition={{ duration: 0.25 }}
                     className="app__flex"
+                    onClick={() => openModal(work)}
+                    style={{ cursor: 'pointer' }}
                   >
                     <AiFillEye />
                   </motion.div>
-                </a>
+                ) : (
+                  <a href={work.projectLink} target="_blank" rel="noreferrer">
+                    <motion.div
+                      whileInView={{ scale: [0, 1] }}
+                      whileHover={{ scale: [1, 0.9] }}
+                      transition={{ duration: 0.25 }}
+                      className="app__flex"
+                    >
+                      <AiFillEye />
+                    </motion.div>
+                  </a>
+                )}
                 <a href={work.codeLink} target="_blank" rel="noreferrer">
                   <motion.div
                     whileInView={{ scale: [0, 1] }}
@@ -85,7 +115,7 @@ const Work = () => {
                     <AiFillGithub />
                   </motion.div>
                 </a>
-                </motion.div>
+              </motion.div>
             </div>
 
             <div className="app__work-content app__flex">
@@ -95,11 +125,31 @@ const Work = () => {
               <div className="app__work-tag app__flex">
                 <p className="p-text">{work.tags[0]}</p>  
               </div>
-            
             </div>
           </div>
         ))}
       </motion.div>
+
+      {/* Modal */}
+      {showModal && selectedProject && (
+        <div className="modal-overlay" onClick={closeModal}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3>{selectedProject.title}</h3>
+              <button className="close-btn" onClick={closeModal}>×</button>
+            </div>
+            <div className="modal-body">
+              <iframe 
+                src={selectedProject.projectLink} 
+                width="100%" 
+                height="100%"
+                frameBorder="0"
+                title={selectedProject.title}
+              />
+            </div>
+          </div>
+        </div>
+      )}
     </>
   )
 }
