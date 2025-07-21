@@ -7,7 +7,7 @@ import { urlFor, client } from '../../client';
 import './Work.scss';
 
 const Work = () => {
-  const [activeFilter, setActiveFilter] = useState('All');
+  const [activeFilter, setActiveFilter] = useState('Personal'); // Changed from 'All' to 'Personal'
   const [animateCard, setAnimateCard] = useState({ y: 0, opacity: 1 });
   const [works, setWorks] = useState([]);
   const [filterWork, setFilterWork] = useState([]);
@@ -23,7 +23,8 @@ const Work = () => {
     client.fetch(query)
       .then((data) => {
         setWorks(data);
-        setFilterWork(data);
+        // Filter to show only 'Personal' items by default
+        setFilterWork(data.filter((work) => work.tags.includes('Personal')));
       });
   }, []);
   
